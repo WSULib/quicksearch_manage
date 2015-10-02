@@ -9,7 +9,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	$dbh->beginTransaction();
 
 	// try find an replace
-	if ($_REQUEST['action'] != "query") {
+	if ($_REQUEST['action'] == "query") {
+
+		echo "firing query";
 
 		// prepare
 	    $stmt = $dbh->prepare("UPDATE quicksearchdata SET {$_REQUEST['col_search']} = REPLACE({$_REQUEST['col_search']}, :find_string, :replace_string) WHERE INSTR({$_REQUEST['col_search']}, :find_string) > 0");    
@@ -19,18 +21,38 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	    // execute      
 	    $stmt->execute();
 
-	    // msg    
-		$affect_count = $stmt->rowCount();
-		$results_msg = "$affect_count rows would be affected.";	
-		$show_rollback_form	 = 1;
-		$results_background_color = "#FFF2CC";
+	    // commit!
+		if (array_key_exists('commit_query', $_REQUEST)) {
 
-		// hide form
-		$fp_show = "hidden";
+			echo "firing commit";
+			
+			// rollback
+			$dbh->commit();
+
+			$results_msg = "Changes committed!";
+			$show_rollback_form = 0;
+			$results_background_color = "#D9EAD3";
+			$fp_show = "show";
+		}
+
+		// show potential
+		else {
+			// msg    
+			$affect_count = $stmt->rowCount();
+			$results_msg = "$affect_count rows would be affected.";	
+			$show_rollback_form	 = 1;
+			$results_background_color = "#FFF2CC";
+
+			// hide form
+			$fp_show = "hidden";
+		}
+	    
 	}
 
 	// try rollback
 	if ($_REQUEST['action'] == "rollback") {
+
+		echo "firing rollback";
 		
 		// rollback
 		$dbh->rollBack();
@@ -41,17 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 		$fp_show = "show";
 	}
 
-	// commit rollback
-	if ($_REQUEST['action'] == "commit") {
-		
-		// rollback
-		$dbh->commit();
 
-		$results_msg = "Changes committed!";
-		$show_rollback_form = 0;
-		$results_background_color = "#D9EAD3";
-		$fp_show = "show";
-	}
 
     // reveal results and hide form
     $results_show = "show";    
@@ -145,7 +157,7 @@ else {
 							</div>
 						</div>
 						<div class="margin20"></div>
-						<input type="hidden" name="rollback" id="rollback" value="0">
+						<input type="hidden" name="action" id="action" value="query">
 						<input class="button-primary" type="submit" value="Submit">
 					</form>
 				</div>
@@ -163,15 +175,16 @@ else {
 					<?php
 					if ($show_rollback_form == 1) {
 					?>
-						<form action="." method="POST">					
-							<input type="hidden" name="col_search" id="col_search" value="<?php echo $_REQUEST['col_search']; ?>">
-							<input type="hidden" name="find_string" id="find_string" value="<?php echo $_REQUEST['replace_string']; ?>">
-							<input type="hidden" name="replace_string" id="replace_string" value="<?php echo $_REQUEST['find_string']; ?>">
+						<form action="." method="POST">												
 							<input type="hidden" name="action" id="action" value="rollback">
 							<input class="button-primary" type="submit" value="Rollback?">							
 						</form>
-						<form action="." method="POST">					
-							<input type="hidden" name="action" id="action" value="commit">
+						<form action="." method="POST">
+							<input type="hidden" name="col_search" id="col_search" value="<?php echo $_REQUEST['col_search']; ?>">
+							<input type="hidden" name="find_string" id="find_string" value="<?php echo $_REQUEST['find_string']; ?>">
+							<input type="hidden" name="replace_string" id="replace_string" value="<?php echo $_REQUEST['replace_string']; ?>">					
+							<input type="hidden" name="action" id="action" value="query">
+							<input type="hidden" name="commit_query" id="commit_query" value="1">
 							<input class="button-primary" type="submit" value="Commit!">							
 						</form>
 					<?php
