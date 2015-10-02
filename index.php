@@ -18,18 +18,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // reveal results
     $results_show = "show";
 
-
-
 }
-
 
 // offer rollback that would switch the find and replace...
 
 else {
 	$results_show = "hidden";	
 }
-
-
 
 ?>
 
@@ -56,7 +51,6 @@ else {
 		</style>
 
 	</head>
-
 
 	<body>
 
