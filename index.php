@@ -11,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	// try find an replace
 	if ($_REQUEST['action'] == "query") {
 
-		echo "firing query";
 
 		// prepare
 	    $stmt = $dbh->prepare("UPDATE quicksearchdata SET {$_REQUEST['col_search']} = REPLACE({$_REQUEST['col_search']}, :find_string, :replace_string) WHERE INSTR({$_REQUEST['col_search']}, :find_string) > 0");    
@@ -24,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	    // commit!
 		if (array_key_exists('commit_query', $_REQUEST)) {
 
-			echo "firing commit";
 			
 			// rollback
 			$dbh->commit();
@@ -52,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	// try rollback
 	if ($_REQUEST['action'] == "rollback") {
 
-		echo "firing rollback";
 		
 		// rollback
 		$dbh->rollBack();
