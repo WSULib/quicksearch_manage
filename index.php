@@ -12,8 +12,16 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // execute      
     $stmt->execute();
 
-    $affect_count = $stmt->rowCount();
-    $results_msg = "$affect_count rows affected.";
+    // 
+    if ($_REQUEST['rollback'] == "1") {
+    	$results_msg = "Changes rolledback.  Please use the form again.";
+    	$show_rollback_form = 0;
+    }
+    else {
+    	$affect_count = $stmt->rowCount();
+		$results_msg = "$affect_count rows affected.";	
+		$show_rollback_form	 = 1;
+    }
 
     // reveal results
     $results_show = "show";
@@ -78,7 +86,22 @@ else {
 				<div class="twelve columns results">
 					<h4>Results</h4>
 					<p id="results_msg"><?php echo $results_msg; ?></p>
-					<!-- <button class="button-primary <?php echo $results_msg; ?>" type="button">Rollback?</button> -->
+
+					<!-- hidden form for rollback -->
+					<?php
+					if ($show_rollback_form == 1) {
+					?>
+						<form action="." method="POST">					
+							<input type="hidden" name="col_search" id="col_search" value="<?php echo $_REQUEST['col_search']; ?>">
+							<input type="hidden" name="find_string" id="find_string" value="<?php echo $_REQUEST['replace_string']; ?>">
+							<input type="hidden" name="replace_string" id="replace_string" value="<?php echo $_REQUEST['find_string']; ?>">
+							<input type="hidden" name="rollback" id="rollback" value="1">
+							<input class="button-primary" type="submit" value="Rollback?">
+						</form>
+					<?php
+					}
+					?>					
+
 				</div>
 			</div>
 
@@ -112,6 +135,7 @@ else {
 							</div>
 						</div>
 						<div class="margin20"></div>
+						<input type="hidden" name="rollback" id="rollback" value="0">
 						<input class="button-primary" type="submit" value="Submit">
 					</form>
 				</div>
